@@ -228,7 +228,7 @@ var _B = Matrix( [  // We can join two matrix
 assert.equal( _B._( 4, 4 ), 2 ); // should returns true
 ```
 
-#### `Lalgebra.AL.vector(Array)`
+#### `Lalgebra.vector(Array)`
 Constructor of a vector object with instance property array that is the array self passed as parameter, matrix (Here the vectors are matrixes of nx1) and the instance methods `dot(Vector)` that calculates the dot product, `sum(Vector[,Vector,...])`, `pscalar(Number)` and `cross(Vector)` that calculates the cross product. In another hand the constructor has the class method: `dotp(Vector,Vector)`,  `sum(Vector,Vector[,Vector...])`, `scalarp(Number,Vector)` and `crossp(Vector,Vector[,Vector,...])`. Here the vectors behave as nx1 matrix, because of has all the methods and properties of matrix in matrix property.
 
 ```js
@@ -264,150 +264,11 @@ a_n1x_1+a_n2 x_2+...a_nn x_n = b_n
 to do that is necessary pass the matrix [[a_11,a_12...a_1n]...,[a_n1,a_n2...a_nn]]firstly and the result array [b_1,b_2...,b_n]. Return the array solution for the system [x_1,x_2,...,x_n].
 
 ```js
-var AL = require('Lalgebra').AL;
+var solveLE = require('Lalgebra').solveLE;
 var mat = [[0,1.1,6],[1,4.6,-5],[0.1,0,-0.9]] ;
 var result = [5,6,0];
 solveLE(mat,result) ; //[6.36,0.68,0.7,]
 ```
-
-#### `Lalgebra.Stats`
-Here is exposed the statistical methods, this a application of Linear Algebra methods.
-
-```js
-var data = [
-  [3,4,5,2,1,5,6],
-  [1,4,0,4,1,5,6],
-  [6,4,5,2,1,5,1],
-  [3,4,5,5,0,5,4],
-  [4,4,5,2,1,5,12],
-  [0,4,0,9,1,5,3],
-  [6,4,3,2,0,5,6]
-]
-var stats = new JNsolve.Stats(data) ;
-stats.media() // return the matrix with array :
-// [
-// [ 3.2857142857142856 ],
-// [ 4 ],
-// [ 3.2857142857142856 ],
-// [ 3.714285714285714 ],
-// [ 0.7142857142857142 ],
-// [ 5 ],
-// [ 5.428571428571428 ]
-// ]
-
-stats.std() // return the correlation matrix of data
-stats.covariance() //  returns the covariance matrix of data
-```
-
-### `Numerical analysis`
-#### `Lalgebra.calculusN.D`
-Object with differents numerics methods to calculate the derivative of a function.
-
-##### `Lalgebra.calculusN.D.Nof(Function,Number,Array)`
-Constructor that generates the numeric derivative of `Function`=> f(x) with a  `Number` => N given of divisions in an interval  `Array` => [a,b].
-
-```js
-Lalgebra.D.Nof(f,1000,[2,7])
-```
-
-##### `Lalgebra.calculusN.D.Nof.f_x`
-Instance method what is the derivative numerical of  `Function` with a   `Number` given of divisions in an interval   `Array`.
-
-```js
-Lalgebra.D.Nof(f,1000,[2,7]).f_x(3)
-```
-
-is a aproximation to the derivative of f (df_dx) on 3 with the 1000 divisions in the interval [2,7]. Is available another method that calculate the numerical derivative calculating the dx_i in a optimazed way, dx_i=h/sqrt(1+dfdx^2) with h=(b-a)/N.
-
-##### `Lalgebra.calculusN.D_opt.Nof(Function,Number,Array)`
-##### `Lalgebra.calculusN.D_opt.Nof.f_x`
-##### `Lalgebra.calculusN.D.linear_interpolation(Array)`
-Is a constructor that generates the numeric linear interpolation of data given in `Array`= [[x_1,y_2],[x_2,y_3],...[x_n,y_n]] in the interval [x_1,x_n].
-
-```js
-array_to_interpolate = [[0,3.2],[1,4.6],[2,5.1],[4,6.9]] ;
-Lalgebra.calculusN.D.linear_interpolation(array_to_interpolate)
-```
-
-##### `Lalgebra.calculusN.D.linear_interpolation(Array).function_interpolated`
-Is a instance method what is the interpolated function of `Array` given.
-
-```js
-Lalgebra.D.linear_interpolation(array_to_interpolate).function_interpolated(2.5)
-```
-
-Is a aproximation interpolated to the `Array` = [[0,3.2],[1,4.6],[2,5.1],[4,6.9]].
-
-#### `Lalgebra.nsolveqn(Function, Array[,Number,Object])`
-Is a method that calculate numerically the solution of `Function`=>f(x)=0 try in the interval (`Array`=>[a,b]) beginning  on `Number`=>x_0 (initial point).
-
-```js
-function f(x) {
-  return x-Math.cos(x) ;
-}
-Lalgebra.nsolveqn(f,0.5,[0,1]) = 0.73952
-```
-
-The `Object`is default options and are { npoints_DNumeric : 1000, presicion : 0.001 , nstepsmax : 1000 , method : 'Newton_Rapshon' }. The mothods available are RegulaFalsi, bisection,fixedpoint,Newton_Raphson_Higherorder, Newton_Raphson. The rest of routines for every method are availables:
-
-#### `Lalgebra.calculusN.RegulaFalsi(Function,Array[,Object])`
-#### `Lalgebra.calculusN.bisection(Function, Array[,Object])`
-#### `Lalgebra.calculusN.fixedpoint(Function,Number[,Object])`
-#### `Lalgebra.calculusN.Newton_Raphson(Function,Array[, Number, Object])`
-#### `Lalgebra.calculusN.Newton_Raphson_Higherorder(Function,Array[, Number, Object])`
-in every case if x_0 is undefined, is taken from a random number  in interval `Array`=>[a,b]. All these methods return a object with properties Root, numSteps and method used.
-
-#### `Lalgebra.calculusN.findroot(Function, Array[,Number,Object])`
-Is a method that calculate numerically the solution of `Function`=>f(x)=0 try in the interval (`Array`=>[a,b]) beginning  on `Number`=>x_0 (initial point).
-
-```js
-Lalgebra.calculusN.findroot(f,0.5,[0,1]) = 0.73952
-```
-
-The `Object`is default options and are { npoints_DNumeric : 1000, precision : 0.001 , nstepsmax : 1000 , method : 'Newton_Rapshon' }. Here, findroot try find the root of function by all methods availables in the module.
-
-### `Data Fitting`
-#### `Lalgebra.fit.best(Array[,Array,Array,Object,Function])`
-![Plot Data with Best fit](./plots/plotdata.png)
-
-Calculate the best fit using the first `Array`= [[x_1,y_1,z_1...],[x_2,y_2,z_2...],...[x_n,y_n,z_n,...]] argument as data input (if the fit is already calculated before you can pass it instead), the second  `Array` = [z_1,z_2...z_m] argument are the values of x's for which is necessary calculate their y`s values respectively, the third argument are the values of "y" for which is queried the values of "x". The properties of options object are smoothing (default = True), noiseeliminate (default = True), smoothingmethod (default ='exponential' only by moment), alpha (default = 0.8) and fits_name (the fits function) to use: the availables function are inverse (a/(b+x)), linear (ax+b), exponential (a_e^(bx)), logarithmic (a+b Log(x)), polynomial (ax^2+bx+c), sqrt (a_ sqrt(x)+b) and power (ax^b), if not specified take all function availables, using (array) property specified wich column of data in Array is taken to do the fist. The noiseeliminate method eliminate data that are beyond of 3.5 standard deviation from mean[(99.95 % Reliability if data have a normal distribution)](http://onlinestatbook.com/2/calculators/normal_dist.html), does that make a loop filter until that not one data is out of this limit. Return a object with the properties: ans_ofY,ans_ofX, fitUsed, fitEquationUsed, fitParamsUsed, fitPointsUsed, fitWithError and fit. The last parameter is a callback function that receive as only parameter the fit self.
-
-```js
-array_to_fit =[[0,4,40],[1,-2,48],[3,9,56],[4,120,70]];
-array_of_x = [3.4, 4.8, 8, 11] ;
-array_of_y = [75,83,99,105];
-Lalgebra.bestfit(array_to_fit,array_of_x,array_of_y );
- fit = { ans_ofY:
-   [ [ 3.4, 61.41945099444754 ],
-     [ 4.8, 77.93133160533434 ],
-     [ 8, 202.14957607090903 ],
-     [ 11, -408.9420392173956 ] ],
-  ans_ofX:
-   [ [ 4.596464057224314, 75 ],
-     [ 5.118019106548409, 83 ],
-     [ 5.908254029766733, 99 ],
-     [ 6.142502239149309, 105 ] ],
-  fitOptions:
-   { smoothing: true,
-     noiseeliminate: false,
-     smoothingmethod: 'exponential',
-     alpha: 0.9,
-     fits_name: [ 'sqrt', 'inverse' ],
-     using: [ 0, 2 ] },
-  fitUsed: 'inverse',
-  fitEquationUsed: 'y = -405.84/(x - 10.01)',
-  fitParamsUsed: [ -405.8350227553108, -10.007597693961792 ],
-  fitPointsUsed: [ [ 0, 40 ], [ 1, 47.2 ], [ 3, 55.12 ], [ 4, 68.512 ] ],
-  fitWithError: 2.05844894339866,
-  fit:
-   { sqrt: { regression: [Object], error: 3.4369281428656664 },
-     inverse: { regression: [Object], error: 2.05844894339866 },
-     best: { name: 'inverse', error: 2.05844894339866, f: [Function] } } }
-```
-
-
-[![Throughput Graph](https://graphs.waffle.io/4yopping/Lalgebra/throughput.svg)](https://waffle.io/4yopping/Lalgebra/metrics)
-
 ## Contributing
 In lieu of a formal style guide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code.  For any bugs report please contact to me via e-mail: cereceres@ciencias.unam.mx.
 
