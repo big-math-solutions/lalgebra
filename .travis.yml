@@ -1,0 +1,14 @@
+
+language: node_js
+
+node_js:
+  - "5"
+
+services:
+  - mongodb
+
+notifications:
+  slack: 4yopping:ALhrivGHquJzo5MPODfnRIvI
+
+before_install:
+  - echo -e "Host github.com\n\tHostName github.com\n\tUser git\n\tIdentityFile ~/.ssh/id_rsa\n" >> ~/.ssh/config
