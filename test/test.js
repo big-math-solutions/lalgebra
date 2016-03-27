@@ -86,7 +86,6 @@ describe('Linear Algebra', function() {
       [1, 0],
       [3, 2]
     ], 3, 3)
-    console.log('_b', _B.array);
     assert.equal(_B._(4, 4), 2); // should returns true
   });
   it('The applyByColumn method return a matrix with the correct array',

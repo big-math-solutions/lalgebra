@@ -31,7 +31,9 @@
     "url": "https://github.com/4yopping/lalgebra/issues"
   },
   "homepage": "https://github.com/4yopping/lalgebra#readme",
-  "dependencies": {},
+  "dependencies": {
+    "gauss-jordan-inverse": "0.0.1"
+  },
   "devDependencies": {
     "async": "^1.4.2",
     "commander": "^2.8.1",
