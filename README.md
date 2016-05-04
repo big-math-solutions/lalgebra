@@ -270,7 +270,7 @@ var result = [5,6,0];
 solveLE(mat,result) ; //[6.36,0.68,0.7,]
 ```
 ## Contributing
-In lieu of a formal style guide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code.  For any bugs report please contact to me via e-mail: cereceres@ciencias.unam.mx.
+In lieu of a formal style guide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code.  For any bugs report please contact to me via e-mail: dev@futurecommerce.mx.
 
 ## Licence
 The MIT License (MIT)
