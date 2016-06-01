@@ -11,7 +11,4 @@
       vector: vector,
     };
   lalgebra.utils = require('./utils/utils');
-  process.on('uncaughtException', function(error) {
-    console.log('A error was not catched:', error);
-  })
-  module.exports = lalgebra
+  module.exports= lalgebra
