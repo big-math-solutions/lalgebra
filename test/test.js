@@ -86,6 +86,10 @@ describe('Linear Algebra', function() {
       [1, 0],
       [3, 2]
     ], 3, 3)
+<<<<<<< HEAD
+=======
+    assert.equal(_B._(4, 4), 2); // should returns true
+>>>>>>> 3109596a702c864e55d4a507c2e04efb4c958670
   });
   it('The applyByColumn method return a matrix with the correct array',
     function() {
