@@ -30,4 +30,4 @@ const filter = (Matrix) => function(B, _map) {
     return new Matrix(array, B.row, B._column, B.opt);
 };
 
-module.exports = filter
+module.exports = filter;

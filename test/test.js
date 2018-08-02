@@ -144,7 +144,7 @@ describe('Linear Algebra', () => {
     it(
         'The multiply of  matrix with itself should be a matrix with (1,2) component equal to 16 ',
         () => {
-            const res = JNsolve.matrix.multiply(A, A)
+            const res = JNsolve.matrix.multiply(A, A);
             assert.equal(res._(1, 2), 16); // should returns true
         });
     it(

@@ -1,7 +1,6 @@
 const _minor = require('./minor');
 
-const __det =(Matrix)=> {
-    return (B) => {
+const __det = (Matrix) => (B) => {
     if (!B)return;
 
     if (!(B instanceof Matrix)) B = new Matrix(B);
@@ -24,5 +23,4 @@ const __det =(Matrix)=> {
         return _det;
     }
 };
-}
 module.exports = __det;

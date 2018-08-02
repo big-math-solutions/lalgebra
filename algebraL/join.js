@@ -17,4 +17,4 @@ const _join = (Matrix) => function(A, B, p, t) {
     return new Matrix(array);
 };
 
-module.exports = _join
+module.exports = _join;

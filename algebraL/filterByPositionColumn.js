@@ -1,6 +1,5 @@
 
-const _filter = (Matrix) => {
-    return (_B, _map) => {
+const _filter = (Matrix) => (_B, _map) => {
     let test;
     if (_map === undefined || !_B)
         return;
@@ -26,7 +25,6 @@ const _filter = (Matrix) => {
     }
     return Matrix(array, map.row, B._column, B.opt).trans();
 };
-}
 
 const addd = (Matrix) => function(array) {
     let l = array.length,
