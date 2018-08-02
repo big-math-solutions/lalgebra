@@ -15,7 +15,7 @@ let slice = Array.prototype.slice,
     inv = require('./inverse'),
     minor = require('./minor'),
     trans = require('./trans'),
-    matrix_nxm = require('./matrix_nxm'),
+    Matrix_nxm = require('./matrix_nxm'),
     map = require('./map'),
     truncate = require('../utils/truncate'),
     forEach = require('./foreach'),
@@ -35,7 +35,7 @@ let slice = Array.prototype.slice,
     applyLeft = require('./applyLeft'),
     applyByRow = require('./applyByRow'),
     applyByColumn = require('./applyByColumn'),
-    Vector = require('./vector'),
+    getVector = require('./vector'),
     toArray = require('./toArray'),
     toObject = require('./toObject'),
     toVectorWithRow = require('./toVectorWithRow'),
@@ -45,15 +45,15 @@ require('../utils/arraySimilarly')();
 
 function countColumn(array) {
     const res = [ ];
-    for (let i = 0; i < array.length; i++) {
+    for (let i = 0; i < array.length; i++)
         res.push(array[i].length);
-    }
+
     return res;
 }
 
 /** @constructor
- * Constructor of a matrix.
- * @param {Array} array to build the matrix, {Number} matrix's row , {Array} matrix's column
+ * Constructor of a Matrix.
+ * @param {Array} array to build the Matrix, {Number} Matrix's row , {Array} Matrix's column
  */
 function _validate(array, row, column, opt) {
     if (typeof row === 'object') {
@@ -80,14 +80,8 @@ function _validate(array, row, column, opt) {
         array
     };
 }
-
-function toReturnElement(i, j) {
-    return this.array[(i - 1) % this.row % this._row]
-        [(j - 1) % this.getColumn(i) % this.array[(i - 1) % this.array.length]
-            .length
-        ];
-}
-var matrix = function(array, row, column, opt) {
+const Vector = getVector(Matrix)
+function Matrix(array, row, column, opt) {
     const validate = _validate(array, row, column, opt);
     opt = validate.opt;
     array = validate.array;
@@ -99,292 +93,320 @@ var matrix = function(array, row, column, opt) {
     };
     opt.deep = opt.deep !== undefined ? opt.deep : true;
     opt.force = opt.force !== undefined ? opt.force : true;
-    if (array instanceof Vector) {
-        return array.matrix;
-    } else if (array instanceof matrix) {
-        return array;
-    } else if (!(this instanceof matrix)) {
-        return new matrix(array, row, column, opt);
-    }
+    if (array instanceof Vector) return array.Matrix;
+    else if (array instanceof Matrix) return array;
+    else if (!(this instanceof Matrix)) return new Matrix(array, row, column, opt);
+
     array = typeof array === 'object' && !Array.isArray(array) && opt.force ?
         toArray(array, opt) : array;
     array = Array.isArray(array) ? array : [
         [ array ]
     ];
-    for (let i = 0; i < array.length; i++) {
+    for (let i = 0; i < array.length; i++)
         array[i] = Array.isArray(array[i]) ? array[i] : [ array[i] ];
-    }
-    const test = Boolean(array.length);
-    if (test) {
-    // get elements of matrix
-        this._ = function(i, j) {
-            if (arguments.length < 3) {
-                if (i !== undefined && j !== undefined) {
-                    const _i = (i - 1) % this.row % this._row;
-                    const _j = (j - 1) % this.getColumn(i) % this._array[_i].length;
-                    return this._array[_i][_j];
-                } else if (i !== undefined && j === undefined) {
-                    return matrix([ this.array[(i - 1) % this._row] ], this.opt);
-                } else if (i === undefined && j !== undefined) {
-                    return this.trans()._(j).trans();
-                }
-            } else {
+
+    if (!array.length) return;
+    // get elements of Matrix
+    this._ = function(i, j) {
+        if (arguments.length < 3) {
+            if (i !== undefined && j !== undefined) {
                 const _i = (i - 1) % this.row % this._row;
-                const _j = _i !== undefined ? (j - 1) % this.getColumn(i) %
+                const _j = (j - 1) % this.getColumn(i) % this._array[_i].length;
+                return this._array[_i][_j];
+            } else if (i !== undefined && j === undefined)
+                return Matrix([ this.array[(i - 1) % this._row] ], this.opt);
+            else if (i === undefined && j !== undefined)
+                return this.trans()._(j).trans();
+        } else {
+            const _i = (i - 1) % this.row % this._row;
+            const _j = _i !== undefined ? (j - 1) % this.getColumn(i) %
           this._array[_i].length : j - 1;
-                const toReturn = this._array[_i][_j];
-                return toReturn._ ? toReturn._(...slice.call(
-                    arguments, 2)) : toReturn;
-            }
-        } .bind(this);
-        // get column of matrix
-        this.getColumn = function(i) {
-            return this._column[(i - 1) % this._column.length];
-        } .bind(this);
-        // Define de array property
-        Object.defineProperty(this, 'array', {
-            get() {
-                return this._array;
-            },
-            set(array) {
-                array = Array.isArray(array) ? array : [
-                    [ array ]
-                ];
-                for (let i = 0; i < array.length; i++) {
-                    array[i] = Array.isArray(array[i]) ? array[i] : [
-                        array[i]
-                    ];
-                }
-                this._row = array.length;
-                this._array = array;
-            }
-        });
-        this.opt = opt;
-        this._array = array;
-        this._row = array.length;
-        this.row = row || array.length;
-        this.column = column || countColumn(this.array);
-        this._column = Array.isArray(this.column) ? this.column : [
-            this.column
-        ];
-        // Adjunt of  matrix
-        this.adj = function() {
-            return adj(this);
-        } .bind(this);
-        // Diagonal of matrix
-        this.diagonal = function(cb) {
-            return diagonal(this, cb);
-        } .bind(this);
-        // Inverse of matrix
-        this.inv = function(cb) {
-            return inv(this, cb);
-        } .bind(this);
-        // The comparation function
-        this.isEqual = function(A) {
-            return this.array.equals(A.array);
-        } .bind(this);
-        // similarly function to matrix, the elements compared
-        // by rows
-        this.isSimilarlyByRow = function(A) {
-            return this.array.similarly(A.array);
-        } .bind(this);
-        // similarly function to matrix, the elements compared
-        // by columns
-        this.isSimilarlyByColumn = function(A) {
-            return this.trans().array.similarly(A.array);
-        } .bind(this);
-        // Determinant of matrix
-        this.det = function(cb) {
-            return det(this, cb);
-        } .bind(this);
-        // The join method of matrix
-        this.join = function(A, i, j, cb) {
-            return join(this, A, i, j, cb);
-        } .bind(this);
-        // transpose of matrix
-        this.trans = function(cb, opt) {
-            return trans(this, cb, opt);
-        } .bind(this);
-        // Transform a matrix to a object
-        this.toObject = function() {
-            return toObject(this.array);
-        } .bind(this);
-        // concatRight of matrix
-        this.concatRight = function() {
-            const arg = slice.call(arguments);
-            arg.unshift(this);
-            return concatRight(arg);
-        } .bind(this);
-        // concatLeft of matrix
-        this.concatLeft = function() {
-            const arg = slice.call(arguments);
-            arg.unshift(this);
-            return concatLeft(arg);
-        } .bind(this);
-        // concatDown of matrix
-        this.concatDown = function() {
-            const arg = slice.call(arguments);
-            arg.unshift(this);
-            return concatDown(arg);
-        } .bind(this);
-        // concatUp of matrix
-        this.concatUp = function() {
-            const arg = slice.call(arguments);
-            arg.unshift(this);
-            return concatUp(arg);
-        } .bind(this);
-        // multiply of matrix
-        this.x = function(A, cb) {
-            if (typeof A === 'number') {
-                return this.scalar(A, cb);
-            }
-            const arg = slice.call(arguments);
-            arg.unshift(this);
-            return x(arg);
-        } .bind(this);
-        // Direct multiply of matrix
-        this._x = function() {
-            const arg = slice.call(arguments);
-            arg.unshift(this);
-            return _x(arg);
-        } .bind(this);
-        // sum of matrix
-        this.plus = function() {
-            const arg = slice.call(arguments);
-            arg.unshift(this);
-            return plus(arg);
-        } .bind(this);
-        // Scalar product of matrix
-        this.scalar = function(alpha, cb) {
-            return scalar(alpha, this, cb);
-        } .bind(this);
-        // Power a matrix
-        this.pow = function(n, cb) {
-            return pow(this, n, cb);
-        } .bind(this);
-        // apply a matrix over other matrix
-        this.apply = function() {
-            const arg = slice.call(arguments);
-            arg.unshift(this);
-            return apply.call(this, arg);
-        } .bind(this);
-        // applyLeft a matrix over other matrix
-        this.applyLeft = function() {
-            const arg = slice.call(arguments);
-            arg.unshift(this);
-            return applyLeft.call(this, arg);
-        } .bind(this);
-        // apply by row
-        this.applyByRow = function() {
-            const arg = slice.call(arguments);
-            arg.unshift(this);
-            return applyByRow.call(this, arg);
-        } .bind(this);
-        // apply by column
-        this.applyByColumn = function() {
-            const arg = slice.call(arguments);
-            arg.unshift(this);
-            return applyByColumn.call(this, arg);
-        } .bind(this);
-        // the power direct  product
-        this._pow = function(n, cb) {
-            return _pow(this, n, cb);
-        } .bind(this);
-        // calculate the minor of a matrix
-        this.minor = function(i, j, cb) {
-            return minor(i, j, this, cb);
-        } .bind(this);
-        // applicate the map to a matrix
-        this.map = function(cb, _cb) {
-            return map(cb, this, _cb);
-        } .bind(this);
-        // filter the matrix
-        this.filter = function() {
-            const arg = slice.call(arguments);
-            arg.unshift(this);
-            return filter(arg);
-        } .bind(this);
-        // filterBypositionRow a matrix
-        this.filterByPositionRow = function() {
-            const arg = slice.call(arguments);
-            arg.unshift(this);
-            return filterByPositionRow(arg);
-        } .bind(this);
-        // filterByPositionColumn a matrix
-        this.filterByPositionColumn = function() {
-            const arg = slice.call(arguments);
-            arg.unshift(this);
-            return filterByPositionColumn(arg);
-        } .bind(this);
-        // truncate the values of a matrix
-        this.truncate = function(n, cb) {
-            const _truncate = function(item) {
-                return truncate(item, n);
-            };
-            return map(_truncate, this, cb);
-        } .bind(this);
-        // apply a function to every element of a matrix
-        this.forEach = function(map, cb) {
-            forEach.call(this, map, this, cb);
-        } .bind(this);
-        // apply a function given to every column
-        this.forEachColumn = function(map, cb) {
-            forEachColumn.call(this, map, this, cb);
-        } .bind(this);
-        // apply a function given to every row
-        this.forEachRow = function(map, cb) {
-            forEachRow.call(this, map, this, cb);
-        } .bind(this);
-        // convert a matrix to a vector using the row
-        // up-down taken
-        this.toVectorWithRow = function(opt) {
-            return toVectorWithRow(this, opt);
-        } .bind(this);
-        // convert a matrix to a vector using the column
-        // left-rigth taken
-        this.toVectorWithColumn = function() {
-            return toVectorWithColumn(this);
-        } .bind(this);
-    }
-};
-matrix.toVectorWithRow = toVectorWithRow .bind(matrix);
-matrix.toVectorWithColumn = toVectorWithColumn.bind(matrix);
-matrix.diagonal = diagonal.bind(matrix);
-matrix.adj = adj.bind(matrix);
-matrix.applyByRow = applyByRow.bind(matrix);
-matrix.applyByColumn = applyByColumn.bind(matrix);
-matrix.apply = apply.bind(matrix);
-matrix.applyLeft = applyLeft.bind(matrix);
-matrix.det = det.bind(matrix);
-matrix.inv = inv.bind(matrix);
-matrix.minor = minor.bind(matrix);
-matrix.pscalar = scalar.bind(matrix);
-matrix.sum = plus.bind(matrix);
-matrix.trans = trans.bind(matrix);
-matrix.multiply = x.bind(matrix);
-matrix.multiplyDirect = _x.bind(matrix);
-matrix.pow = pow.bind(matrix);
-matrix._pow = _pow.bind(matrix);
-matrix.map = map.bind(matrix);
-matrix.toObject = function(A) {
-    if (A instanceof matrix) {
-        if (A.getColumn(1) === 1) {
-            return A.trans().array[0];
+            const toReturn = this._array[_i][_j];
+            return toReturn._ ? toReturn._(...slice.call(
+                arguments, 2)) : toReturn;
         }
-        return toObject(A.array);
-    }
-    return toObject(A);
+    } .bind(this);
+    // get column of Matrix
+    this.getColumn = function(i) {
+        return this._column[(i - 1) % this._column.length];
+    } .bind(this);
+    // Define de array property
+    Object.defineProperty(this, 'array', {
+        get() {
+            return this._array;
+        },
+        set(array) {
+            array = Array.isArray(array) ? array : [
+                [ array ]
+            ];
+            for (let i = 0; i < array.length; i++)
+                array[i] = Array.isArray(array[i]) ? array[i] : [
+                    array[i]
+                ];
+
+            this._row = array.length;
+            this._array = array;
+        }
+    });
+    this.opt = opt;
+    this._array = array;
+    this._row = array.length;
+    this.row = row || array.length;
+    this.column = column || countColumn(this.array);
+    this._column = Array.isArray(this.column) ? this.column : [
+        this.column
+    ];
+    // Adjunt of  Matrix
+    this._adj = adj(Matrix)
+    this.adj = function() {
+        return this._adj(this);
+    }.bind(this);
+    // Diagonal of Matrix
+    this._diagonal = diagonal(Matrix)
+    this.diagonal = function() {
+        return this._diagonal(this, );
+    } .bind(this);
+    // Inverse of Matrix
+    this._inv = inv(Matrix)
+
+    this.inv = function() {
+        return this._inv(this, );
+    } .bind(this);
+    // The comparation function
+    this.isEqual = function(A) {
+        return this.array.equals(A.array);
+    } .bind(this);
+    // similarly function to Matrix, the elements compared
+    // by rows
+    this.isSimilarlyByRow = function(A) {
+        return this.array.similarly(A.array);
+    } .bind(this);
+    // similarly function to Matrix, the elements compared
+    // by columns
+    this.isSimilarlyByColumn = function(A) {
+        return this.trans().array.similarly(A.array);
+    } .bind(this);
+    // Determinant of Matrix
+    this._det = det(Matrix)
+    this.det = function() {
+        return this._det(this, );
+    } .bind(this);
+    // The join method of Matrix
+    this._join = join(Matrix)
+    this.join = function(A, i, j, ) {
+        return this._join(this, A, i, j, );
+    } .bind(this);
+    // transpose of Matrix
+    this._trans = trans(Matrix)
+    this.trans = function( opt) {
+        return this._trans(this, opt);
+    } .bind(this);
+    // Transform a Matrix to a object
+    this._toObject = toObject(Matrix)
+    this.toObject = function() {
+        return this._toObject(this.array);
+    } .bind(this);
+    // concatRight of Matrix
+    this._concatRight = concatRight(Matrix)
+    this.concatRight = function() {
+        const arg = slice.call(arguments);
+        arg.unshift(this);
+        return this._concatRight(arg);
+    } .bind(this);
+    // concatLeft of Matrix
+    this._concatLeft = concatLeft(Matrix)
+
+    this.concatLeft = function() {
+        const arg = slice.call(arguments);
+        arg.unshift(this);
+        return this._concatLeft(arg);
+    } .bind(this);
+    // concatDown of Matrix
+    this._concatDown = concatDown(Matrix)
+
+    this.concatDown = function() {
+        const arg = slice.call(arguments);
+        arg.unshift(this);
+        return this._concatDown(arg);
+    } .bind(this);
+    // concatUp of Matrix
+    this._concatUp = concatUp(Matrix)
+
+    this.concatUp = function() {
+        const arg = slice.call(arguments);
+        arg.unshift(this);
+        return this._concatUp(arg);
+    } .bind(this);
+    // multiply of Matrix
+    this.multi = x(Matrix)
+    this.x = function(...args) {
+        if (typeof A === 'number') return this.scalar(A);
+        return this.multi(this, ...args);
+    } .bind(this);
+    this.__x = _x(Matrix)
+    // Direct multiply of Matrix
+    this._x = function() {
+        const arg = slice.call(arguments);
+        arg.unshift(this);
+        return this.__x(arg);
+    } .bind(this);
+    // sum of Matrix
+    this._plus = plus(Matrix)
+    this.plus = function(...args) {
+        return this._plus(this,...args);
+    } .bind(this);
+    // Scalar product of Matrix
+    this._scalar = scalar(Matrix)
+    this.scalar = function(alpha, ) {
+        return this._scalar(alpha, this, );
+    } .bind(this);
+    // Power a Matrix
+    this._pow_ = pow(Matrix)
+    this.pow = function(n, ) {
+        return this._pow_(this, n, );
+    } .bind(this);
+    // apply a Matrix over other Matrix
+    this._apply = apply(Matrix)
+    this.apply = function() {
+        const arg = slice.call(arguments);
+        arg.unshift(this);
+        return this._apply.call(this, arg);
+    } .bind(this);
+    // applyLeft a Matrix over other Matrix
+    this._applyLeft = applyLeft(Matrix)
+
+    this.applyLeft = function() {
+        const arg = slice.call(arguments);
+        arg.unshift(this);
+        return this._applyLeft.call(this, arg);
+    } .bind(this);
+    // apply by row
+    this._applyByRow = applyByRow(Matrix)
+
+    this.applyByRow = function() {
+        const arg = slice.call(arguments);
+        arg.unshift(this);
+        return this._applyByRow.call(this, arg);
+    } .bind(this);
+    // apply by column
+    this._applyByColumn = applyByColumn(Matrix)
+    this.applyByColumn = function() {
+        const arg = slice.call(arguments);
+        arg.unshift(this);
+        return this._applyByColumn.call(this, arg);
+    } .bind(this);
+    // the power direct  product
+    this.__pow = _pow(Matrix)
+    this._pow = function(n, ) {
+        return this.__pow(this, n, );
+    } .bind(this);
+    // calculate the minor of a Matrix
+    this._minor = minor(Matrix)
+    this.minor = function(i, j, ) {
+        return minor(i, j, this, );
+    } .bind(this);
+    // applicate the map to a Matrix
+    this._map = map(Matrix)
+    this.map = function(_) {
+        return this._map(this, _);
+    } .bind(this);
+    // filter the Matrix
+    this._filter = filter(Matrix)
+
+    this.filter = function(_map) {
+        return this._filter(this, _map);
+    } .bind(this);
+    // filterBypositionRow a Matrix
+    this._filterByPositionRow = filterByPositionRow(Matrix)
+
+    this.filterByPositionRow = function() {
+        const arg = slice.call(arguments);
+        arg.unshift(this);
+        return this._filterByPositionRow(arg);
+    } .bind(this);
+    // filterByPositionColumn a Matrix
+    this._filterByPositionColumn = filterByPositionColumn(Matrix)
+
+    this.filterByPositionColumn = function() {
+        const arg = slice.call(arguments);
+        arg.unshift(this);
+        return this._filterByPositionColumn(arg);
+    } .bind(this);
+    // truncate the values of a Matrix
+    this.truncate = function(n ) {
+        return this._map((item) =>truncate(item, n), this );
+    } .bind(this);
+    // apply a function to every element of a Matrix
+    this._forEach = forEach(Matrix)
+    this.forEach = function(map, ) {
+        this._forEach.call(this, map, this, );
+    } .bind(this);
+    // apply a function given to every column
+    this._forEachColumn = forEachColumn(Matrix)
+
+    this.forEachColumn = function(map, ) {
+        this._forEachColumn.call(this, map, this, );
+    } .bind(this);
+    // apply a function given to every row
+    this._forEachRow = forEachRow(Matrix)
+
+    this.forEachRow = function(map, ) {
+        this._forEachRow.call(this, map, this, );
+    } .bind(this);
+    // convert a Matrix to a vector using the row
+    // up-down taken
+    this._toVectorWithRow = toVectorWithRow(Matrix, Vector)
+
+    this.toVectorWithRow = function(opt) {
+        return this._toVectorWithRow(this, opt);
+    } .bind(this);
+    // convert a Matrix to a vector using the column
+    // left-rigth taken
+    this._toVectorWithColumn = toVectorWithColumn(Matrix, Vector)
+
+    this.toVectorWithColumn = function() {
+        return this._toVectorWithColumn(this);
+    } .bind(this);
 };
-matrix.forEach = forEach.bind(matrix);
-matrix.create = matrix_nxm.bind(matrix);
-matrix.ident = identM.bind(matrix);
-matrix.filter = filter.bind(matrix);
-matrix.filterByPositionRow = filterByPositionRow.bind(matrix);
-matrix.filterByPositionColumn = filterByPositionColumn.bind(matrix);
-matrix.zeros = zeros.bind(matrix);
-matrix.ones = ones.bind(matrix);
-matrix.concatDown = concatDown.bind(matrix);
-matrix.concatLeft = concatLeft.bind(matrix);
-matrix.concatRight = concatRight.bind(matrix);
-matrix.concatUp = concatUp.bind(matrix);
-module.exports = matrix;
+Matrix.toVectorWithRow = toVectorWithRow(Matrix).bind(Matrix);
+Matrix.toVectorWithColumn = toVectorWithColumn(Matrix).bind(Matrix);
+Matrix.diagonal = diagonal(Matrix).bind(Matrix);
+Matrix.adj = adj(Matrix).bind(Matrix);
+Matrix.applyByRow = applyByRow(Matrix).bind(Matrix);
+Matrix.applyByColumn = applyByColumn(Matrix).bind(Matrix);
+Matrix.apply = apply(Matrix).bind(Matrix);
+Matrix.applyLeft = applyLeft(Matrix).bind(Matrix);
+Matrix.det = det(Matrix).bind(Matrix);
+Matrix.inv = inv(Matrix).bind(Matrix);
+Matrix.minor = minor(Matrix).bind(Matrix);
+Matrix.pscalar = scalar(Matrix).bind(Matrix);
+Matrix.sum = plus(Matrix).bind(Matrix);
+Matrix.trans = trans(Matrix).bind(Matrix);
+Matrix.multiply = x(Matrix).bind(Matrix);
+Matrix.multiplyDirect = _x(Matrix).bind(Matrix);
+Matrix.pow = pow(Matrix).bind(Matrix);
+Matrix._pow = _pow(Matrix).bind(Matrix);
+Matrix.map = map(Matrix).bind(Matrix);
+const _toObject = toObject(Matrix)
+Matrix.toObject = function(A) {
+    if (A instanceof Matrix) {
+        if (A.getColumn(1) === 1)
+            return A.trans().array[0];
+
+        return _toObject(A.array);
+    }
+    return _toObject(A);
+};
+Matrix.forEach = forEach(Matrix).bind(Matrix);
+Matrix.create = Matrix_nxm(Matrix).bind(Matrix);
+Matrix.ident = identM(Matrix).bind(Matrix);
+Matrix.filter = filter(Matrix).bind(Matrix);
+Matrix.filterByPositionRow = filterByPositionRow(Matrix).bind(Matrix);
+Matrix.filterByPositionColumn = filterByPositionColumn(Matrix).bind(Matrix);
+Matrix.zeros = zeros(Matrix).bind(Matrix);
+Matrix.ones = ones(Matrix).bind(Matrix);
+Matrix.concatDown = concatDown(Matrix).bind(Matrix);
+Matrix.concatLeft = concatLeft(Matrix).bind(Matrix);
+Matrix.concatRight = concatRight(Matrix).bind(Matrix);
+Matrix.concatUp = concatUp(Matrix).bind(Matrix);
+module.exports = Matrix;

@@ -1,19 +1,15 @@
-function apply(A, B) {
+const apply = (Matrix) => function(A, B) {
     const thisArg = {
         A,
         B
     };
     let a;
-    if (!A || !B) {
-        return;
-    }
-    const Matrix = require('./Mat');
-    if (!(A instanceof Matrix)) {
-        A = new Matrix(A);
-    }
-    if (!(B instanceof Matrix)) {
-        B = new Matrix(B);
-    }
+    if (!A || !B) return;
+
+    if (!(A instanceof Matrix)) A = new Matrix(A);
+
+    if (!(B instanceof Matrix)) B = new Matrix(B);
+
     let ii = A.row,
         array = [ ],
         i, k, kk;
@@ -30,35 +26,16 @@ function apply(A, B) {
         }
     }
     return new Matrix(array);
-}
+};
 
-function addd(array) {
+const addd = (Matrix) => function(array) {
     let l = array.length,
         A = array[0],
         B, p;
     for (p = 1; p < l; p++) {
         B = array[p];
-        A = apply.call(this, A, B);
+        A = apply(Matrix).call(this, A, B);
     }
     return A;
-}
-module.exports = function(arg) {
-    if (arg === undefined) {
-        return;
-    }
-    if (arguments.length > 1) {
-        arg = Array.prototype.slice.call(arguments);
-    }
-    const cb = arg[arg.length - 1];
-    if (cb && typeof cb === 'function' && arg.length > 2) {
-        arg.pop();
-        return new Promise(function(full, rej) {
-            try {
-                full(cb.call(this, null, addd.call(this, arg)));
-            } catch (e) {
-                rej(cb.call(this, e, null));
-            }
-        });
-    }
-    return addd.call(this, arg);
 };
+module.exports = addd;

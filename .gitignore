@@ -2,7 +2,7 @@
 
 .facaderc
 keys
-
+.vscode
 ### Node ###
 # Logs
 logs

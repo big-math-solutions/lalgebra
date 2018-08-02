@@ -6,26 +6,25 @@ module.exports = function() {
         const keys = Object.keys(obj);
         const thisKeys = Object.keys(this);
         // Check if every object have the same number of keys
-        if (keys.length !== thisKeys.length) {
+        if (keys.length !== thisKeys.length)
             return false;
-        }
+
         let index;
         // Find the index of key given
         for (let i = 0, l = thisKeys.length; i < l; i++) {
             index = keys.indexOf(thisKeys[i]);
-            if (index === -1) {
+            if (index === -1)
                 return false;
-            }
+
             // Check if we have nested arrays
             if (this[thisKeys[i]] instanceof Object && obj[keys[index]] instanceof Object) {
                 // recurse into the nested arrays
-                if (!this[thisKeys[i]].equals(obj[keys[index]])) {
+                if (!this[thisKeys[i]].equals(obj[keys[index]]))
                     return false;
-                }
-            } else if (this[thisKeys[i]] !== obj[keys[index]]) {
+            } else if (this[thisKeys[i]] !== obj[keys[index]])
                 // Warning - two different object instances will never be equal: {x:20} != {x:20}
                 return false;
-            }
+
             keys.splice(index, 1);
         }
         return true;

@@ -1,22 +1,14 @@
-'use strict';
-
-/** @function
- * multiply the matrix object.
- * @param {Object} matrix {Object} matrix.
- * @return {Object} matrix
- */
-function product(A, B) {
+const product = (Matrix) => function(A, B) {
     let test = false;
-    if (!A || !B) {
+    if (!A || !B)
         return;
-    }
-    const Matrix = require('./Mat');
-    if (!(A instanceof Matrix)) {
+
+    if (!(A instanceof Matrix))
         A = new Matrix(A);
-    }
-    if (!(B instanceof Matrix)) {
+
+    if (!(B instanceof Matrix))
         B = new Matrix(B);
-    }
+
     let ii = A.row,
         kk, array = [ ],
         i, k;
@@ -26,17 +18,16 @@ function product(A, B) {
         test = false;
         for (k = 1; k <= kk; k++) {
             test = test || typeof A._(i, k) === 'object' || typeof B._(i, k) === 'object';
-            if (test) {
+            if (test)
                 array[i - 1][k - 1] = product(A._(i, k), B._(i, k));
-            } else {
+            else
                 array[i - 1][k - 1] = A._(i, k) * B._(i, k);
-            }
         }
     }
     return new Matrix(array);
-}
+};
 module.exports = function(A, B, cb) {
-    if (cb && typeof cb === 'function') {
+    if (cb && typeof cb === 'function')
         return new Promise((full, rej) => {
             try {
                 full(cb.call({
@@ -50,6 +41,6 @@ module.exports = function(A, B, cb) {
                 }, e, null));
             }
         });
-    }
+
     return product(A, B);
 };

@@ -121,34 +121,6 @@ describe('Linear Algebra', () => {
         () => {
             assert.equal(A._pow(7)._(2, 2), Math.pow(3, 7)); // should returns true
         });
-    it('Calls the function when the foreach methods is called', () => {
-        const callback = sinon.spy();
-        A.forEach(callback);
-        assert(callback.called);
-    });
-    it('Calls the function when the forEachColumn methods is called',
-        () => {
-            const callback = sinon.spy();
-            A.forEachColumn(callback);
-            assert(callback.called);
-        });
-    it('Calls the function when the forEachRow methods is called', () => {
-        const callback = sinon.spy();
-        A.forEachRow(callback);
-        assert(callback.called);
-    });
-    it('Calls the function when the map methods is called with A._(1,1)',
-        () => {
-            const callback = sinon.spy();
-            const test = A._(1, 1);
-            A.map(callback);
-            assert(callback.calledWith(test));
-        });
-    it('Calls the function when the map methods is called', () => {
-        const callback = sinon.spy();
-        A.map(callback);
-        assert(callback.called);
-    });
     it('The toVectorWithColumn return  a vector [1,4,1,3]', () => {
         assert.equal(A.toVectorWithColumn().dim, 4);
         // should returns true
@@ -159,112 +131,6 @@ describe('Linear Algebra', () => {
         // should returns true
         assert.equal(A.toVectorWithRow().matrix._(3, 1), 4); // should returns true
     });
-    it(
-        'When the object {a:21,b:"hola"} is filtered with the array = [0,1] and the method toObject is applied return {b:"hola"}',
-        () => {
-            assert.equal(JNsolve.matrix({
-                a: 21,
-                b: 'hola',
-                c: 34,
-                d: 'eitt',
-                key: 'value'
-            }).filter([ 0, 1, true, false ]).toObject().b, 'hola'); // should returns true
-        });
-    it(
-        'When the filterByPositionRow is applied the correct result is obtained',
-        () => {
-            const matrix = JNsolve.matrix;
-            let filter = [
-                [ 1, 2 ],
-                [ 3, 4 ]
-            ];
-            const obj = {
-                a: 1,
-                b: 'hola',
-                c: [ 3, 2, 5 ],
-                d: {
-                    key: 'value'
-                }
-            };
-            let trans = function() {
-                return {
-                    e: 3
-                };
-            };
-            const _filter = matrix(filter, {
-                deep: false
-            });
-            trans = matrix(trans, _filter.row, _filter._column, {
-                deep: false,
-                force: false
-            });
-            const objMat = matrix(obj, {
-                deep: false,
-                force: true
-            });
-            filter = objMat.filterByPositionRow;
-            const filterMat = matrix(filter, _filter.row, _filter._column);
-            assert.equal(typeof filterMat._(_filter.row, 1), 'function'); //
-            const objFiltered = filterMat.apply(_filter);
-            assert.equal(objFiltered._(1, 2)._(1, 1), 'b');
-            assert.equal(objFiltered._(1, 2)._(1, 2), 'hola');
-            const objTrans = trans.apply(objFiltered);
-            assert.equal(objTrans._(1, 1).e, 3);
-            const array = [];
-            objTrans.forEachColumn((column) => {
-                const obj = {};
-                column.forEach((item) => {
-                    Object.assign(obj, item);
-                });
-                array.push(obj);
-            });
-            assert.equal(array[0].e, 3);
-            assert.equal(array[1].e, 3); // should returns true
-        });
-    it(
-        'When the filterByPositionColumn is applied the correct result is obtained',
-        () => {
-            const matrix = JNsolve.matrix;
-            let filter = [
-                [ 1, 2 ],
-                [ 3, 4 ]
-            ];
-            const obj = [
-                [ 2, 3, 4, 5 ],
-                [ 1, 3, 1, 5 ],
-                [ 0, 0, 1, -1 ]
-            ];
-            let trans = function() {
-                return {
-                    key: 'value'
-                };
-            };
-            const _filter = matrix(filter, {
-                deep: false
-            });
-            trans = matrix(trans, _filter.row, _filter._column, {
-                deep: false
-            });
-            const objMat = matrix(obj, {
-                deep: false
-            });
-            filter = objMat.filterByPositionColumn;
-            const filterMat = matrix(filter, _filter.row, _filter._column, {
-                deep: false
-            });
-            const objFiltered = filterMat.apply(_filter);
-            assert.equal(objFiltered._(1, 2)._(3, 1), 0);
-            const objTrans = trans.apply(objFiltered);
-            const array = [];
-            objTrans.forEachColumn((column) => {
-                const obj = {};
-                column.forEach((item) => {
-                    Object.assign(obj, item);
-                });
-                array.push(obj);
-            });
-            assert.equal(array[0].key, 'value'); // should returns true
-        });
     it(
         'The cuadratic power of  matrix should be a matrix with (2,2) component equal to 13 ',
         () => {
@@ -278,7 +144,8 @@ describe('Linear Algebra', () => {
     it(
         'The multiply of  matrix with itself should be a matrix with (1,2) component equal to 16 ',
         () => {
-            assert.equal(JNsolve.matrix.multiply(A, A)._(1, 2), 16); // should returns true
+            const res = JNsolve.matrix.multiply(A, A)
+            assert.equal(res._(1, 2), 16); // should returns true
         });
     it(
         'The multiply of  matrix with a scalar 3 should be a matrix with (2,1) component equal to 3',

@@ -1,18 +1,17 @@
 'use strict';
 module.exports = function() {
     Array.prototype.indexOfItem = function(item) {
-        for (let i = 0, l = this.length; i < l; i++) {
+        for (let i = 0, l = this.length; i < l; i++)
         // Check if we have nested object
             if (item instanceof Array) {
                 // recurse into the nested object
-                if (item.similarly(this[i])) {
+                if (item.similarly(this[i]))
                     return i;
-                }
-            } else if (this[i] === item) {
+            } else if (this[i] === item)
                 // Warning - two different object instances will never be equal: {x:20} != {x:20}
                 return i;
-            }
-        }
+
+
         return -1;
     };
     // Hide method from for-in loops
@@ -23,26 +22,25 @@ module.exports = function() {
     Array.prototype.similarly = function(array) {
         const keys = Array.from(array);
         // Check if every object have the same number of keys
-        if (this.length !== keys.length) {
+        if (this.length !== keys.length)
             return false;
-        }
+
         let index;
         // Find the index of key given
         for (let i = 0, l = this.length; i < l; i++) {
             index = keys.indexOfItem(this[i]);
-            if (index === -1) {
+            if (index === -1)
                 return false;
-            }
+
             // Check if we have nested arrays
             if (this[i] instanceof Array && keys[index] instanceof Array) {
                 // recurse into the nested arrays
-                if (!this[i].similarly(keys[index])) {
+                if (!this[i].similarly(keys[index]))
                     return false;
-                }
-            } else if (this[i] !== keys[index]) {
+            } else if (this[i] !== keys[index])
                 // Warning - two different object instances will never be equal: {x:20} != {x:20}
                 return false;
-            }
+
             keys.splice(index, 1);
         }
         return true;

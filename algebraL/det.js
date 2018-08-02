@@ -1,19 +1,11 @@
-'use strict';
-const minor = require('./minor');
+const _minor = require('./minor');
 
-/** @function
- * The determinat of matrix.
- * @param  {Object} matrix.
- * @return {Number} determinant.
- */
-const det = function(B) {
-    if (!B) {
-        return;
-    }
-    const Matrix = require('./Mat');
-    if (!(B instanceof Matrix)) {
-        B = new Matrix(B);
-    }
+const __det =(Matrix)=> {
+    return (B) => {
+    if (!B)return;
+
+    if (!(B instanceof Matrix)) B = new Matrix(B);
+
     let _det;
     if (B.row >= 0) {
         if (B.row > 2) {
@@ -21,26 +13,16 @@ const det = function(B) {
                 i, arrayminor = [ ];
             _det = 0;
             for (i = 1; i <= ii; i++) {
-                arrayminor[i - 1] = minor(1, i, B);
-                _det = _det + Math.pow(-1, 1 + i) * det(arrayminor[i - 1]) * B._(1, i);
+                arrayminor[i - 1] = Matrix.minor(1, i, B);
+                _det = _det + Math.pow(-1, 1 + i) * Matrix.det(arrayminor[i - 1]) * B._(1, i);
             }
-        } else if (B.row === 2) {
+        } else if (B.row === 2)
             _det = B._(1, 1) * B._(2, 2) - B._(1, 2) * B._(2, 1);
-        } else if (B.row === 1) {
+        else if (B.row === 1)
             _det = B._(1, 1);
-        }
+
         return _det;
     }
 };
-module.exports = function(B, cb) {
-    if (cb && typeof cb === 'function') {
-        return new Promise((full, rej) => {
-            try {
-                full(cb.call(B, null, det(B)));
-            } catch (e) {
-                rej(null, cb.call(B, e));
-            }
-        });
-    }
-    return det(B);
-};
+}
+module.exports = __det;
